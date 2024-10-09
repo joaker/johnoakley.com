@@ -1,11 +1,17 @@
 import React from 'react';
 import Two from 'two.js';
+import { TWO_PI } from 'two.js/src/utils/math';
 
 const elem = document.body;
 const two = new Two({
   type: Two.Types.svg,
   fullscreen: true
 }).appendTo(elem);
+
+const drag = 0.125;
+let core;
+let lastSecond = 0;
+let coreRBGA = 0;
 
 let background = two.makeGroup();
 let middleground = two.makeGroup();
@@ -15,47 +21,148 @@ const sunAndMoon = makeSunAndMoon(two)
 sunAndMoon.translation.set(two.width / 2, two.height / 2);
 middleground.add(sunAndMoon)
 
+// const seconds = makeSeconds(two);
+// seconds.translation.set(two.width / 2, two.height / 2);
+// foreground.add(seconds);
+
+const numbers = makeNumbers(two);
+// numbers.translation.set(two.width / 2, two.height / 2);
+// foreground.add(numbers);
+
+
+
 two
   .bind('resize', function() {
 
     sunAndMoon.translation.x = two.width / 2;
     sunAndMoon.translation.y = two.height / 2;
-    // path.translation.copy(sunAndMoon.translation);
+    // TODO - do this for all translations
 
   })
   .bind('update', function(frameCount) {
-    // what to do each frame update
-  })
+
+
+    const date = getDate();
+
+    const { hour, minute, second, millisecond } = date;
+
+    const transparency = (millisecond/1000).toFixed(2);
+
+    const maxLumens = 42 * 2;
+    
+    const lumens = (maxLumens * transparency).toFixed(0);
+    const downLumens = (maxLumens - lumens).toFixed(0);
+
+    const rgb = `rgb(${lumens}, ${lumens}, ${lumens})`;
+    const downRgb = `rgb(${downLumens}, ${downLumens}, ${downLumens})`;
+
+    if(core) {
+        // console.log(`the second is: ${second}`)
+        if(second % 2) {
+            console.log(`alumen: ${rgb}`);
+            core.fill = rgb;
+        } else {
+            console.log(`dlumen: ${downRgb}`);
+            core.fill = downRgb;
+        }
+    }    
+
+
+
+    const rotation = TWO_PI * (hour / 24 + minute / 60 + second / ( 60 * 60 ));
+
+    // numbers.rotation = rotation;  
+    })
+
   .play();
 
-// const createCircle = () => {
-//     // Two.js has convenient methods to make shapes and insert them into the scene.
-//     let radius = 50;
-//     let x = two.width * 0.5;
-//     let y = two.height * 0.5 - radius * 1.25;
-//     let circle = two.makeCircle(x, y, radius);
+function makeSeconds(too) {
+    const scale = 4.5;
+    const radius = Math.min(too.width / scale, too.height / scale);
 
-//     y = two.height * 0.5 + radius * 1.25;
-//     let width = 100;
-//     let height = 100;
-//     let rect = two.makeRectangle(x, y, width, height);
+    const ticks = too.makeCircle(0, 0, radius);
+    ticks.noFill();
+    ticks.dashes = [1, (TWO_PI * radius / 60)];
+    ticks.linewidth = 50;
+    ticks.stroke = 'grey';
 
-//     // The object returned has many stylable properties:
-//     circle.fill = 'black';
-//     // And accepts all valid CSS color:
-//     circle.stroke = '#66b3ff';
-//     circle.linewidth = 5;
+    return ticks;
+}
 
-// }
+function makeSecondHand(too) {
+    const sc = new too.make
+}
+
+function makeNumbers(too) {
+    const drag = 0.125;
+    const count = 12; // 12
+
+    const scale = 3;
+    const radius = Math.min(too.width / scale, too.height / scale);
+
+    const numbers = too.makeGroup()
+
+    const size = radius * (0.33/count/12)
+
+    const styles = {
+        size, //: radius * 0.33,
+        weight: 'bold',
+        family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+        fill: 'grey',
+        opacity: 0.33,
+    };
+
+    for (let i = 0; i < count; i++) {
+
+        const x = radius * Math.sin(i / 12 * TWO_PI);
+        const y = - radius * Math.cos(i / 12 * TWO_PI);
+        const number = new Two.Text(i === 0 ? 12 : i, x, y, styles);
+
+
+        
+        number.position.set(x, y);
+        numbers.add(number);
+    
+    }
+
+    return numbers;
+    
+}
+
+const message = 'Each\nBeat\nCounts'
+
+function makeBanner(too) {
+
+    const scale = 4.5;
+
+
+    const radius = Math.min(too.width / scale, too.height / scale);
+
+    const size = radius * (0.33)
+
+    const styles = {
+        size, //: radius * 0.33,
+        weight: 'bold',
+        family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+        fill: 'grey',
+        opacity: 0.33,
+    };
+
+
+        const x = 0; // radius * Math.sin(i / 12 * TWO_PI);
+        const y = 0; //- radius * Math.cos(i / 12 * TWO_PI);
+        const banner = new Two.Text(message, x, y, styles);
+        return banner;
+}
 
 function makeSunAndMoon(too) {
 
     let color = 'black';
     let sam = too.makeGroup();
-    let radius = too.height / 4;
+    const radius = too.height / 4;
     let gutter = too.height / 20;
   
-    let core = too.makeCircle(0, 0, radius);
+    core = too.makeCircle(0, 0, radius);
     core.stroke = '#66b3ff';
     core.linewidth = 5;
 
@@ -83,7 +190,40 @@ function makeSunAndMoon(too) {
     sam.add(core).add(coronas);
   
     return sam;
+
+
   
+
+
+  }
+
+  function randomRBG() {
+    return Math.ceil( 255 * Math.random());
+  }
+
+  function getRandomColor() {
+    const r = randomRBG();
+    const b = randomRBG();
+    const g = randomRBG();
+
+    return {
+        r: randomRBG(),  
+        g: randomRBG(),  
+        b: randomRBG(),  
+
+    };
+  }
+
+  function getDate() {
+    const date = new Date();
+    
+    return {
+        hour: date.getHours(),
+        minute: date.getMinutes(),
+        second: date.getSeconds(),
+        millisecond: date.getMilliseconds(),
+    }
+
   }
 
   function makeTriangle(too, size) {
