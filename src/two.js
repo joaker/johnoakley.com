@@ -12,6 +12,8 @@ const drag = 0.125;
 let core;
 let lastSecond = 0;
 let coreRBGA = 0;
+const maxLumens = 42;
+const tickColor = lumenToRBG(maxLumens);
 
 let background = two.makeGroup();
 let middleground = two.makeGroup();
@@ -30,12 +32,20 @@ corona.fill = hourMarkerColor;
 sunAndMoon.add(corona);  
 
 
+
 middleground.add(sunAndMoon)
 
 
-// const seconds = makeSeconds(two);
-// seconds.translation.set(two.width / 2, two.height / 2);
-// foreground.add(seconds);
+const seconds = makeSeconds(two);
+seconds.translation.set(two.width / 2, two.height / 2);
+foreground.add(seconds);
+
+const now = new Two.Line(0, 0, 0, - radius * 0.9);
+now.stroke = '#0044cc';
+now.linewidth = 5;
+
+foreground.add(now);
+
 
 const numbers = makeNumbers(two);
 // numbers.translation.set(two.width / 2, two.height / 2);
@@ -59,8 +69,6 @@ two
     const { hour, minute, second, millisecond } = date;
 
     const transparency = (millisecond/1000).toFixed(2);
-
-    const maxLumens = 42;
     
     const lumens = (maxLumens * transparency).toFixed(0);
     const downLumens = (maxLumens - lumens).toFixed(0);
@@ -81,22 +89,22 @@ two
 
     setCoronaMarker(two, date);
 
-    const rotation = TWO_PI * (hour / 24 + minute / 60 + second / ( 60 * 60 ));
-
     // numbers.rotation = rotation;  
     })
 
   .play();
 
 function makeSeconds(too) {
-    const scale = 4.5;
+    const scale = 4.4;
     const radius = Math.min(too.width / scale, too.height / scale);
 
     const ticks = too.makeCircle(0, 0, radius);
     ticks.noFill();
-    ticks.dashes = [1, (TWO_PI * radius / 60)];
-    ticks.linewidth = 50;
-    ticks.stroke = 'grey';
+    ticks.dashes = [1, (TWO_PI * radius / 12)];
+    ticks.linewidth = 20;
+    ticks.stroke = tickColor;
+
+    ticks.rotation = - TWO_PI * .26/60;
 
     return ticks;
 }
@@ -191,6 +199,10 @@ function makeSunAndMoon(too) {
 
   }
 
+  function lumenToRBG(lumens) {
+    return `rgb(${lumens}, ${lumens}, ${lumens})`
+  }  
+
   function randomRBG() {
     return Math.ceil( 255 * Math.random());
   }
@@ -246,7 +258,11 @@ function setCoronaMarker(too, date = getDate()) {
     const y = - radius * Math.cos(twelveHourPercent * TWO_PI);
     
     corona.translation.set(x, y);
-    corona.rotation = Math.atan2(-y, -x) + Math.PI / 2;
+
+    // const rotation = Math.TWO_PI - (Math.atan2(-y, -x) + Math.PI / 2);
+    const rotation = Math.atan2(-y, -x) - Math.PI / 2;
+    // console.log({rotation})
+    corona.rotation = rotation;
 
 }
 
