@@ -59,10 +59,10 @@ two
     if(core) {
         // console.log(`the second is: ${second}`)
         if(second % 2) {
-            console.log(`alumen: ${rgb}`);
+            // console.log(`alumen: ${rgb}`);
             core.fill = rgb;
         } else {
-            console.log(`dlumen: ${downRgb}`);
+            // console.log(`dlumen: ${downRgb}`);
             core.fill = downRgb;
         }
     }    
