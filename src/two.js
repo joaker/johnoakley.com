@@ -17,9 +17,21 @@ let background = two.makeGroup();
 let middleground = two.makeGroup();
 let foreground = two.makeGroup();
 
+let corona = null;
 const sunAndMoon = makeSunAndMoon(two)
+const radius = two.height / 4;
+let gutter = two.height / 20;
+const hourMarkerColor = 'rgb(255, 128, 0)';
 sunAndMoon.translation.set(two.width / 2, two.height / 2);
+
+corona = makeTriangle(two, gutter);  
+corona.noStroke();  
+corona.fill = hourMarkerColor;
+sunAndMoon.add(corona);  
+
+
 middleground.add(sunAndMoon)
+
 
 // const seconds = makeSeconds(two);
 // seconds.translation.set(two.width / 2, two.height / 2);
@@ -48,7 +60,7 @@ two
 
     const transparency = (millisecond/1000).toFixed(2);
 
-    const maxLumens = 42 * 2;
+    const maxLumens = 42;
     
     const lumens = (maxLumens * transparency).toFixed(0);
     const downLumens = (maxLumens - lumens).toFixed(0);
@@ -67,7 +79,7 @@ two
         }
     }    
 
-
+    setCoronaMarker(two, date);
 
     const rotation = TWO_PI * (hour / 24 + minute / 60 + second / ( 60 * 60 ));
 
@@ -170,29 +182,11 @@ function makeSunAndMoon(too) {
   
     sam.core = core;
 
-    const hourMarkerColor = 'rgb(255, 128, 0)';
-  
-    let coronas = [];
-    let corona_amount = 1;
-    for (let i = 0; i < corona_amount; i++) {
-      let pct = (i + 1) / corona_amount;
-      let theta = pct * Math.PI * -.5;
-      let x = (radius + gutter) * Math.cos(theta);
-      let y = (radius + gutter) * Math.sin(theta);
-      let corona = makeTriangle(too, gutter);
-      corona.noStroke();
-      corona.fill = hourMarkerColor;
-      corona.translation.set(x, y);
-      corona.rotation = 0;//Math.atan2(-y, -x) + Math.PI / 2;
-      coronas.push(corona);
-    }
-  
-    sam.add(core).add(coronas);
-  
-    return sam;
+    sam.add(core);
 
-
-  
+    setCoronaMarker(too);
+    
+    return sam;  
 
 
   }
@@ -214,9 +208,7 @@ function makeSunAndMoon(too) {
     };
   }
 
-  function getDate() {
-    const date = new Date();
-    
+  function getDate(date = new Date()) {    
     return {
         hour: date.getHours(),
         minute: date.getMinutes(),
@@ -225,6 +217,39 @@ function makeSunAndMoon(too) {
     }
 
   }
+
+  function getTwelveHour(date = getDate()) {
+
+    const { hour, minute, second, millisecond } = date;
+
+    const twelveHour = hour % 12 + minute / 60 + second / 60 / 60 + millisecond / 60 / 60 / 1000;
+    return twelveHour;
+}
+
+function getTwelveHourPercent(date = getDate()) {
+    const twelveHour = getTwelveHour(date);
+    return twelveHour / 12;
+}
+
+function setCoronaMarker(too, date = getDate()) {
+
+    if(!corona) return;
+
+    const baseRadius = too.height / 4;
+    const gutter = too.height / 20;
+
+    const radius = baseRadius + gutter;
+
+    const twelveHourPercent = getTwelveHourPercent();
+
+    const x = radius * Math.sin(twelveHourPercent * TWO_PI);
+    const y = - radius * Math.cos(twelveHourPercent * TWO_PI);
+    
+    corona.translation.set(x, y);
+    corona.rotation = Math.atan2(-y, -x) + Math.PI / 2;
+
+}
+
 
   function makeTriangle(too, size) {
     var tri = two.makePath(- size / 2, 0, size / 2, 0, 0, size);
