@@ -13,12 +13,13 @@ let core;
 let lastSecond = 0;
 let coreRBGA = 0;
 const maxLumens = 42;
-const tickColor = lumenToRBG(maxLumens);
+const foregroundColor = lumenToRBG(maxLumens);
 
 let background = two.makeGroup();
 let middleground = two.makeGroup();
 let foreground = two.makeGroup();
 
+let banner = null;
 let corona = null;
 const sunAndMoon = makeSunAndMoon(two)
 const radius = two.height / 4;
@@ -36,9 +37,11 @@ sunAndMoon.add(corona);
 middleground.add(sunAndMoon)
 
 
-const seconds = makeSeconds(two);
-seconds.translation.set(two.width / 2, two.height / 2);
-foreground.add(seconds);
+const hourTicks = makeHourTicks(two);
+hourTicks.translation.set(two.width / 2, two.height / 2);
+foreground.add(hourTicks);
+
+const messages = '\n\nEach\n\nMoment\n\nCounts\n\n\n\n'.split('\n');
 
 const now = new Two.Line(0, 0, 0, - radius * 0.9);
 now.stroke = '#0044cc';
@@ -50,6 +53,7 @@ foreground.add(now);
 const numbers = makeNumbers(two);
 // numbers.translation.set(two.width / 2, two.height / 2);
 // foreground.add(numbers);
+
 
 
 
@@ -88,13 +92,14 @@ two
     }    
 
     setCoronaMarker(two, date);
+    setBanner(two, second);
 
     // numbers.rotation = rotation;  
     })
 
   .play();
 
-function makeSeconds(too) {
+function makeHourTicks(too) {
     const scale = 4.4;
     const radius = Math.min(too.width / scale, too.height / scale);
 
@@ -102,7 +107,7 @@ function makeSeconds(too) {
     ticks.noFill();
     ticks.dashes = [1, (TWO_PI * radius / 12)];
     ticks.linewidth = 20;
-    ticks.stroke = tickColor;
+    ticks.stroke = foregroundColor;
 
     ticks.rotation = - TWO_PI * .26/60;
 
@@ -149,12 +154,13 @@ function makeNumbers(too) {
     
 }
 
-const message = 'Each\nBeat\nCounts'
+function setBanner(too, second) {
 
-function makeBanner(too) {
+  if(banner) {
+    foreground.remove(banner);
+  }
 
     const scale = 4.5;
-
 
     const radius = Math.min(too.width / scale, too.height / scale);
 
@@ -164,14 +170,21 @@ function makeBanner(too) {
         size, //: radius * 0.33,
         weight: 'bold',
         family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-        fill: 'grey',
+        fill: foregroundColor,
         opacity: 0.33,
     };
 
+    const messageIndex = Math.round(second) % messages.length;
 
-        const x = 0; // radius * Math.sin(i / 12 * TWO_PI);
-        const y = 0; //- radius * Math.cos(i / 12 * TWO_PI);
-        const banner = new Two.Text(message, x, y, styles);
+    const message = messages[messageIndex];
+
+    const x = 0; // radius * Math.sin(i / 12 * TWO_PI);
+    const y = 0; //- radius * Math.cos(i / 12 * TWO_PI);
+    banner = new Two.Text(message, x, y, styles);
+
+    banner.translation.set(two.width / 2, two.height / 2);
+    foreground.add(banner);
+
         return banner;
 }
 
