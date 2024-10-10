@@ -41,7 +41,8 @@ const hourTicks = makeHourTicks(two);
 hourTicks.translation.set(two.width / 2, two.height / 2);
 foreground.add(hourTicks);
 
-const messages = '\n\nEach\n\nMoment\n\nCounts\n\n\n\n'.split('\n');
+let messageReady = false;
+const messages = '\n\nEvery\n\nBeat\n\nCounts\n\n\n\n'.split('\n');
 
 const now = new Two.Line(0, 0, 0, - radius * 0.9);
 now.stroke = '#0044cc';
@@ -175,6 +176,11 @@ function setBanner(too, second) {
     };
 
     const messageIndex = Math.round(second) % messages.length;
+    if( !messageReady && messageIndex === 0) {
+      messageReady = true;
+    }
+
+    if(!messageReady) return;
 
     const message = messages[messageIndex];
 
@@ -185,7 +191,7 @@ function setBanner(too, second) {
     banner.translation.set(two.width / 2, two.height / 2);
     foreground.add(banner);
 
-        return banner;
+    return banner;
 }
 
 function makeSunAndMoon(too) {
