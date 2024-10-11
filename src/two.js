@@ -8,55 +8,47 @@ const two = new Two({
   fullscreen: true
 }).appendTo(elem);
 
-const drag = 0.125;
+
 let core;
-let lastSecond = 0;
-let coreRBGA = 0;
-const maxLumens = 42;
+let gutter = two.height / 20;
+const maxLumens = 42 / (2/3) ;
+const haloColor = '#66b3ff';
 const foregroundColor = lumenToRBG(maxLumens);
+
+const hourMarkerColor = 'rgb(255, 128, 0)';
+const minuteMarkerColor = foregroundColor;  
+const secondMarkerColor = haloColor;
 
 let background = two.makeGroup();
 let middleground = two.makeGroup();
 let foreground = two.makeGroup();
 
 let banner = null;
-let corona = null;
+
+let hourCorona = makeTriangle(two, gutter);  
+let minuteCorona = makeTriangle(two, gutter * .8, 4);  
+let secondCorona = makeTriangle(two, gutter * .5, 8);  
+
 const sunAndMoon = makeSunAndMoon(two)
-const radius = two.height / 4;
-let gutter = two.height / 20;
-const hourMarkerColor = 'rgb(255, 128, 0)';
 sunAndMoon.translation.set(two.width / 2, two.height / 2);
+ 
+hourCorona.noStroke();  
+hourCorona.fill = hourMarkerColor;
+sunAndMoon.add(hourCorona);  
 
-corona = makeTriangle(two, gutter);  
-corona.noStroke();  
-corona.fill = hourMarkerColor;
-sunAndMoon.add(corona);  
+minuteCorona.noStroke();  
+minuteCorona.fill = minuteMarkerColor;
+sunAndMoon.add(minuteCorona);  
+
+secondCorona.noStroke();  
+secondCorona.fill = secondMarkerColor;
+sunAndMoon.add(secondCorona);  
 
 
-
-middleground.add(sunAndMoon)
-
-
-const hourTicks = makeHourTicks(two);
-hourTicks.translation.set(two.width / 2, two.height / 2);
-foreground.add(hourTicks);
+middleground.add(sunAndMoon);  
 
 let messageReady = false;
-const messages = '\n\nEvery\n\nBeat\n\nCounts\n\n\n\n'.split('\n');
-
-const now = new Two.Line(0, 0, 0, - radius * 0.9);
-now.stroke = '#0044cc';
-now.linewidth = 5;
-
-foreground.add(now);
-
-
-const numbers = makeNumbers(two);
-// numbers.translation.set(two.width / 2, two.height / 2);
-// foreground.add(numbers);
-
-
-
+const messages = '\n\nEvery\n\nMoment\n\nCounts\n\n\n\n'.split("\n\n");
 
 two
   .bind('resize', function() {
@@ -71,7 +63,7 @@ two
 
     const date = getDate();
 
-    const { hour, minute, second, millisecond } = date;
+    const { second, millisecond } = date;
 
     const transparency = (millisecond/1000).toFixed(2);
     
@@ -92,68 +84,15 @@ two
         }
     }    
 
-    setCoronaMarker(two, date);
+    setCoronaMarkers(two, date);
     setBanner(two, second);
+
+    // now.rotation = TWO_PI * (second + millisecond / 1000) / 60
 
     // numbers.rotation = rotation;  
     })
 
   .play();
-
-function makeHourTicks(too) {
-    const scale = 4.4;
-    const radius = Math.min(too.width / scale, too.height / scale);
-
-    const ticks = too.makeCircle(0, 0, radius);
-    ticks.noFill();
-    ticks.dashes = [1, (TWO_PI * radius / 12)];
-    ticks.linewidth = 20;
-    ticks.stroke = foregroundColor;
-
-    ticks.rotation = - TWO_PI * .26/60;
-
-    return ticks;
-}
-
-function makeSecondHand(too) {
-    const sc = new too.make
-}
-
-function makeNumbers(too) {
-    const drag = 0.125;
-    const count = 12; // 12
-
-    const scale = 3;
-    const radius = Math.min(too.width / scale, too.height / scale);
-
-    const numbers = too.makeGroup()
-
-    const size = radius * (0.33/count/12)
-
-    const styles = {
-        size, //: radius * 0.33,
-        weight: 'bold',
-        family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-        fill: 'grey',
-        opacity: 0.33,
-    };
-
-    for (let i = 0; i < count; i++) {
-
-        const x = radius * Math.sin(i / 12 * TWO_PI);
-        const y = - radius * Math.cos(i / 12 * TWO_PI);
-        const number = new Two.Text(i === 0 ? 12 : i, x, y, styles);
-
-
-        
-        number.position.set(x, y);
-        numbers.add(number);
-    
-    }
-
-    return numbers;
-    
-}
 
 function setBanner(too, second) {
 
@@ -176,11 +115,11 @@ function setBanner(too, second) {
     };
 
     const messageIndex = Math.round(second) % messages.length;
-    if( !messageReady && messageIndex === 0) {
+    if( !messageReady && messageIndex === 10) {
       messageReady = true;
     }
 
-    if(!messageReady) return;
+    // if(!messageReady) return;
 
     const message = messages[messageIndex];
 
@@ -202,7 +141,7 @@ function makeSunAndMoon(too) {
     let gutter = too.height / 20;
   
     core = too.makeCircle(0, 0, radius);
-    core.stroke = '#66b3ff';
+    core.stroke = haloColor;
     core.linewidth = 5;
 
     core.fill = color;
@@ -211,7 +150,7 @@ function makeSunAndMoon(too) {
 
     sam.add(core);
 
-    setCoronaMarker(too);
+    setCoronaMarkers(too);
     
     return sam;  
 
@@ -258,35 +197,80 @@ function makeSunAndMoon(too) {
 }
 
 function getTwelveHourPercent(date = getDate()) {
-    const twelveHour = getTwelveHour(date);
-    return twelveHour / 12;
+    const percent = getTwelveHour(date);
+    return percent / 12;
 }
 
-function setCoronaMarker(too, date = getDate()) {
+function getMinutePercent(date = getDate()) {
+  const { minute, second, millisecond } = date;
+  const percent = minute / 60 + second / 60 / 60 + millisecond / 60 / 60 / 1000;
+  return percent;
 
-    if(!corona) return;
+}
 
+
+
+function getSecondPercent(date = getDate()) {
+  const { second, millisecond } = date;
+  const percent = second / 60 + millisecond / 60 / 1000;
+  return percent;
+}
+
+function setCoronaMarkers(too, date = getDate()) {
     const baseRadius = too.height / 4;
-    const gutter = too.height / 20;
 
-    const radius = baseRadius + gutter;
+    if(!hourCorona || !minuteCorona) return;
 
-    const twelveHourPercent = getTwelveHourPercent();
+    const hourGutter = too.height / 25;
 
-    const x = radius * Math.sin(twelveHourPercent * TWO_PI);
-    const y = - radius * Math.cos(twelveHourPercent * TWO_PI);
-    
-    corona.translation.set(x, y);
+    const hourRadius = baseRadius + hourGutter;
 
-    // const rotation = Math.TWO_PI - (Math.atan2(-y, -x) + Math.PI / 2);
-    const rotation = Math.atan2(-y, -x) - Math.PI / 2;
-    // console.log({rotation})
-    corona.rotation = rotation;
+
+    const twelveHourPercent = getTwelveHourPercent(date);
+
+    setCoronaMarker(hourCorona, twelveHourPercent, hourRadius)
+
+    const minutePercent = getMinutePercent(date);
+
+    const minuteGutter = too.height / 35;
+
+    const minuteRadius = baseRadius + minuteGutter;
+
+    setCoronaMarker(minuteCorona, minutePercent, minuteRadius);
+
+    const secondPercent = getSecondPercent(date);
+
+    const secondGutter = too.height / 100;
+
+    const secondRadius = baseRadius + secondGutter;
+
+    setCoronaMarker(secondCorona, secondPercent, secondRadius);
+
+
+}
+
+function setCoronaMarker(corona, percentComplete, radius) {
+
+  const x = radius * Math.sin(percentComplete * TWO_PI);
+  const y = - radius * Math.cos(percentComplete * TWO_PI);
+  
+  corona.translation.set(x, y);
+
+  const rotation = Math.atan2(-y, -x) - Math.PI / 2;
+  // console.log({rotation})
+  corona.rotation = rotation;
 
 }
 
 
-  function makeTriangle(too, size) {
-    var tri = two.makePath(- size / 2, 0, size / 2, 0, 0, size);
+  function makeTriangle(too, size, factor = 2) {
+    var tri = two.makePath(
+      - size / factor,
+      0,
+      size / factor,
+      0,
+      0,
+      size
+    );
     return tri;
   }
