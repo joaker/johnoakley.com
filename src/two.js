@@ -267,9 +267,27 @@ function revealBanners(too) {
   const size = radius * (0.33)
 
 
+
+
   makeBannerMessage(too, messages[0], size, -size);
   makeBannerMessage(too, messages[1], size, 0);
   makeBannerMessage(too, messages[2], size, size);
+
+  const interval = setInterval(() => {
+    let done = false;
+    [...banners.children].forEach(banner => {
+      banner.opacity += 0.02;
+      if(banner.style.opacity >= 0.42) {
+        done = true;
+      }
+    });
+
+    if(done) {
+      clearInterval(interval);
+    }
+
+
+  }, 100)
 
   foreground.add(banners);
 }
@@ -281,7 +299,7 @@ function makeBannerMessage(too, message, size, offsetY) {
     weight: 'bold',  
     family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',  
     fill: textColor,  
-    opacity: 0.33,  
+    opacity: 0,  
     'pointer-events': 'none',  
   };
 
