@@ -68,26 +68,22 @@ two
 
     sunAndMoon.translation.x = two.width / 2;
     sunAndMoon.translation.y = two.height / 2;
-    // TODO - do this for all translations
 
   })
   .bind('update', function(frameCount) {
 
 
     const date = getDate();
-
-    const { minute, second, millisecond } = date;
+    const { second, millisecond } = date;
 
     if( core ) {
-
-      // 200 / 1000 = 0.20
 
       const interval = 1000 * 3;
       const halfInterval = interval / 2;
 
       const now = millisecond + (second % 3) * 1000;
 
-      const upTransparency = now / interval; //(millisecond/1000).toFixed(2);
+      const upTransparency = now / interval; 
       const downTransparency = 1 - upTransparency;
 
       const transparency = now < halfInterval ? upTransparency : downTransparency;
@@ -98,31 +94,12 @@ two
   
     }
 
-    // const rgb = `rgb(${lumens}, ${lumens}, ${lumens}, ${percentInterval})`;
-    
-    // const downRgb = `rgb(${downLumens}, ${downLumens}, ${downLumens})`;
-
-    // if(core) {
-    //     // console.log(`the second is: ${second}`)
-    //     if( second < 30 ) {
-    //         console.log(`alumen: ${rgb}`);
-    //         core.fill = rgb;
-    //     } else {
-    //       debugger;
-    //         console.log(`dlumen: ${downRgb}`);
-    //         core.fill = downRgb;
-    //     }
-    // }    
-
     if(interactiveCore) {
       interactiveCore.fill = interactiveCoreColor;
     }    
 
     setCoronaMarkers(two, date);
 
-    // now.rotation = TWO_PI * (second + millisecond / 1000) / 60
-
-    // numbers.rotation = rotation;  
   })
   .play();
 
@@ -179,27 +156,6 @@ function makeSunAndMoon(too) {
     interactive.add(interactiveCore);
     
     return interactive;  
-  }
-
-  function lumenToRBG(lumens) {
-    return `rgb(${lumens}, ${lumens}, ${lumens})`
-  }  
-
-  function randomRBG() {
-    return Math.ceil( 255 * Math.random());
-  }
-
-  function getRandomColor() {
-    const r = randomRBG();
-    const b = randomRBG();
-    const g = randomRBG();
-
-    return {
-        r: randomRBG(),  
-        g: randomRBG(),  
-        b: randomRBG(),  
-
-    };
   }
 
   function getDate(date = new Date()) {    
@@ -363,7 +319,6 @@ function setCoronaMarker(corona, percentComplete, radius) {
   corona.translation.set(x, y);
 
   const rotation = Math.atan2(-y, -x) - Math.PI / 2;
-  // console.log({rotation})
   corona.rotation = rotation;
 
 }
