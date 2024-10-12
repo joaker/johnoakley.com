@@ -252,6 +252,7 @@ function clickEclipse() {
 
 function hideBanners() {
   if(banners) {
+    [...banners.children].forEach(banner => banners.remove(banner));
     foreground.remove(banners);
   }
 }
@@ -284,6 +285,7 @@ function revealBanners(too) {
 
     if(done) {
       clearInterval(interval);
+      banners.forEach(banner => banner.opacity = 0);
     }
 
 
