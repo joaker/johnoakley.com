@@ -12,11 +12,10 @@ const two = new Two({
 let core;
 let interactiveCore;
 let gutter = two.height / 18;
-const maxLumens = 42 / (2/3) ;
+const maxLumens = 100 ;
 const haloColor = '#66b3ff';
-const foregroundColor = lumenToRBG(maxLumens);
 const interactiveCoreColor = 'rgba(255, 255, 255, 0)'
-const textColor = lumenToRBG(maxLumens * 2);
+const textColor = lumenToRBG(maxLumens * 4);
 
 const hourMarkerColor = 'rgb(255, 128, 0)';
 const minuteMarkerColor = 'white';  
@@ -54,8 +53,7 @@ secondCorona.noStroke();
 secondCorona.fill = secondMarkerColor;
 sunAndMoon.add(secondCorona);  
 
-
-background.add(sunAndMoon);  
+background.add(sunAndMoon); 
 
 const centerInteractive = makeCenterInteractive(two)
 centerInteractive.translation.set(two.width / 2, two.height / 2);
@@ -78,26 +76,43 @@ two
 
     const date = getDate();
 
-    const { second, millisecond } = date;
+    const { minute, second, millisecond } = date;
 
-    const transparency = (millisecond/1000).toFixed(2);
+    if( core ) {
+
+      // 200 / 1000 = 0.20
+
+      const interval = 1000 * 3;
+      const halfInterval = interval / 2;
+
+      const now = millisecond + (second % 3) * 1000;
+
+      const upTransparency = now / interval; //(millisecond/1000).toFixed(2);
+      const downTransparency = 1 - upTransparency;
+
+      const transparency = now < halfInterval ? upTransparency : downTransparency;
+
+      const rgba = `rgba(${maxLumens}, ${maxLumens}, ${maxLumens}, ${transparency})`;
+
+      core.fill = rgba;
+  
+    }
+
+    // const rgb = `rgb(${lumens}, ${lumens}, ${lumens}, ${percentInterval})`;
     
-    const lumens = (maxLumens * transparency).toFixed(0);
-    const downLumens = (maxLumens - lumens).toFixed(0);
+    // const downRgb = `rgb(${downLumens}, ${downLumens}, ${downLumens})`;
 
-    const rgb = `rgb(${lumens}, ${lumens}, ${lumens})`;
-    const downRgb = `rgb(${downLumens}, ${downLumens}, ${downLumens})`;
-
-    if(core) {
-        // console.log(`the second is: ${second}`)
-        if(second % 2) {
-            // console.log(`alumen: ${rgb}`);
-            core.fill = rgb;
-        } else {
-            // console.log(`dlumen: ${downRgb}`);
-            core.fill = downRgb;
-        }
-    }    
+    // if(core) {
+    //     // console.log(`the second is: ${second}`)
+    //     if( second < 30 ) {
+    //         console.log(`alumen: ${rgb}`);
+    //         core.fill = rgb;
+    //     } else {
+    //       debugger;
+    //         console.log(`dlumen: ${downRgb}`);
+    //         core.fill = downRgb;
+    //     }
+    // }    
 
     if(interactiveCore) {
       interactiveCore.fill = interactiveCoreColor;
@@ -125,6 +140,11 @@ function makeSunAndMoon(too) {
     let color = 'black';
     let sam = too.makeGroup();
     const radius = too.height / 4;
+
+    const bg = too.makeCircle(0, 0, radius);
+    bg.noStroke();
+    bg.fill = 'black';
+    sam.add(bg);
   
     core = too.makeCircle(0, 0, radius);
     core.stroke = haloColor;
@@ -220,6 +240,7 @@ function enterEclipse() {
 }
 
 function exitEclipse() {
+  messageIndex = -1;
   two.renderer.domElement.style.cursor = 'default';
   clearInterval(messageInterval);
   hideBanners()
