@@ -92,8 +92,6 @@ two
 
       const transparency = now < halfInterval ? upTransparency : downTransparency;
 
-      const rbga = `rgb(102,179,255) ${transparency}`
-
       const rgba = `rgba(${maxLumens}, ${maxLumens}, ${maxLumens}, ${transparency})`;
 
       core.fill = rgba;
