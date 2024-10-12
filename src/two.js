@@ -15,7 +15,7 @@ let gutter = two.height / 18;
 const maxLumens = 100 ;
 const haloColor = '#66b3ff';
 const interactiveCoreColor = 'rgba(255, 255, 255, 0)'
-const textColor = lumenToRBG(maxLumens * 4);
+const textColor = haloColor;
 
 const hourMarkerColor = 'rgb(255, 128, 0)';
 const minuteMarkerColor = 'white';  
@@ -91,6 +91,8 @@ two
       const downTransparency = 1 - upTransparency;
 
       const transparency = now < halfInterval ? upTransparency : downTransparency;
+
+      const rbga = `rgb(102,179,255) ${transparency}`
 
       const rgba = `rgba(${maxLumens}, ${maxLumens}, ${maxLumens}, ${transparency})`;
 
@@ -278,7 +280,7 @@ function revealBanners(too) {
     let done = false;
     [...banners.children].forEach(banner => {
       banner.opacity += 0.02;
-      if(banner.style.opacity >= 0.42) {
+      if(banner.style.opacity >= 0.33) {
         done = true;
       }
     });
