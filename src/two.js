@@ -10,24 +10,34 @@ const two = new Two({
 
 
 let core;
-let gutter = two.height / 20;
+let interactiveCore;
+let gutter = two.height / 18;
 const maxLumens = 42 / (2/3) ;
 const haloColor = '#66b3ff';
 const foregroundColor = lumenToRBG(maxLumens);
+const interactiveCoreColor = 'rgba(255, 255, 255, 0)'
+const textColor = lumenToRBG(maxLumens * 2);
 
 const hourMarkerColor = 'rgb(255, 128, 0)';
-const minuteMarkerColor = foregroundColor;  
+const minuteMarkerColor = 'white';  
 const secondMarkerColor = haloColor;
+
+let messageIndex = -1;
+let messageInterval = null;
+let messageDelay = 1 * 1000;
+const messages = 'Every\nMoment\nCounts'.split("\n");
+
 
 let background = two.makeGroup();
 let middleground = two.makeGroup();
 let foreground = two.makeGroup();
+let interactiveLayer = two.makeGroup();
 
-let banner = null;
+let banners = two.makeGroup();
 
-let hourCorona = makeTriangle(two, gutter);  
-let minuteCorona = makeTriangle(two, gutter * .8, 4);  
-let secondCorona = makeTriangle(two, gutter * .5, 8);  
+let hourCorona = makeTriangle(two, gutter, 8);  
+let minuteCorona = makeTriangle(two, gutter * .5, 4);  
+let secondCorona = makeTriangle(two, gutter * .2, 2);  
 
 const sunAndMoon = makeSunAndMoon(two)
 sunAndMoon.translation.set(two.width / 2, two.height / 2);
@@ -45,10 +55,15 @@ secondCorona.fill = secondMarkerColor;
 sunAndMoon.add(secondCorona);  
 
 
-middleground.add(sunAndMoon);  
+background.add(sunAndMoon);  
 
-let messageReady = false;
-const messages = '\n\nEvery\n\nMoment\n\nCounts\n\n\n\n'.split("\n\n");
+const centerInteractive = makeCenterInteractive(two)
+centerInteractive.translation.set(two.width / 2, two.height / 2);
+interactiveLayer.add(centerInteractive)
+
+two.update();
+
+registerHandlers();
 
 two
   .bind('resize', function() {
@@ -84,53 +99,25 @@ two
         }
     }    
 
+    if(interactiveCore) {
+      interactiveCore.fill = interactiveCoreColor;
+    }    
+
     setCoronaMarkers(two, date);
-    setBanner(two, second);
 
     // now.rotation = TWO_PI * (second + millisecond / 1000) / 60
 
     // numbers.rotation = rotation;  
-    })
-
+  })
   .play();
 
-function setBanner(too, second) {
+function registerHandlers() {
+  two.renderer.domElement.style.cursor = 'pointer';
 
-  if(banner) {
-    foreground.remove(banner);
-  }
+  centerInteractive._renderer.elem.addEventListener('mouseover', enterEclipse);  
+  centerInteractive._renderer.elem.addEventListener('mouseout', exitEclipse);  
+  centerInteractive._renderer.elem.addEventListener('click', clickEclipse);  
 
-    const scale = 4.5;
-
-    const radius = Math.min(too.width / scale, too.height / scale);
-
-    const size = radius * (0.33)
-
-    const styles = {
-        size, //: radius * 0.33,
-        weight: 'bold',
-        family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-        fill: foregroundColor,
-        opacity: 0.33,
-    };
-
-    const messageIndex = Math.round(second) % messages.length;
-    if( !messageReady && messageIndex === 10) {
-      messageReady = true;
-    }
-
-    // if(!messageReady) return;
-
-    const message = messages[messageIndex];
-
-    const x = 0; // radius * Math.sin(i / 12 * TWO_PI);
-    const y = 0; //- radius * Math.cos(i / 12 * TWO_PI);
-    banner = new Two.Text(message, x, y, styles);
-
-    banner.translation.set(two.width / 2, two.height / 2);
-    foreground.add(banner);
-
-    return banner;
 }
 
 function makeSunAndMoon(too) {
@@ -138,11 +125,10 @@ function makeSunAndMoon(too) {
     let color = 'black';
     let sam = too.makeGroup();
     const radius = too.height / 4;
-    let gutter = too.height / 20;
   
     core = too.makeCircle(0, 0, radius);
     core.stroke = haloColor;
-    core.linewidth = 5;
+    core.linewidth = 6;
 
     core.fill = color;
   
@@ -155,6 +141,24 @@ function makeSunAndMoon(too) {
     return sam;  
 
 
+  }
+
+  function makeCenterInteractive(too) {
+    let color = interactiveCoreColor;
+    let interactive = too.makeGroup();
+    const radius = too.height / 4;
+  
+    interactiveCore = too.makeCircle(0, 0, radius);
+    interactiveCore.stroke = interactiveCoreColor;
+    interactiveCore.linewidth = 2;
+
+    interactiveCore.fill = color;
+  
+    interactive.interactiveCore = interactiveCore;
+
+    interactive.add(interactiveCore);
+    
+    return interactive;  
   }
 
   function lumenToRBG(lumens) {
@@ -206,6 +210,67 @@ function getMinutePercent(date = getDate()) {
   const percent = minute / 60 + second / 60 / 60 + millisecond / 60 / 60 / 1000;
   return percent;
 
+}
+
+function enterEclipse() {
+  two.renderer.domElement.style.cursor = 'pointer';
+
+  messageIndex = 0;
+  revealBanners(two);
+}
+
+function exitEclipse() {
+  two.renderer.domElement.style.cursor = 'default';
+  clearInterval(messageInterval);
+  hideBanners()
+}
+
+function clickEclipse() {
+  console.log('eclipse clicked');
+}
+
+function hideBanners() {
+  if(banners) {
+    foreground.remove(banners);
+  }
+}
+
+function revealBanners(too) {
+
+  hideBanners()
+
+  const scale = 4.5;
+
+  const radius = Math.min(too.width / scale, too.height / scale);
+
+  const size = radius * (0.33)
+
+
+  makeBannerMessage(too, messages[0], size, -size);
+  makeBannerMessage(too, messages[1], size, 0);
+  makeBannerMessage(too, messages[2], size, size);
+
+  foreground.add(banners);
+}
+
+function makeBannerMessage(too, message, size, offsetY) {
+
+  const styles = {
+    size,  
+    weight: 'bold',  
+    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',  
+    fill: textColor,  
+    opacity: 0.33,  
+    'pointer-events': 'none',  
+  };
+
+  const x = 0;
+  const y = 0;
+  const banner = new Two.Text(message, x, y, styles);
+
+  banner.translation.set(too.width / 2, too.height / 2 + offsetY);
+
+  banners.add(banner);
 }
 
 
