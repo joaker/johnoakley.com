@@ -12,6 +12,7 @@ const two = new Two({
 let core;
 let interactiveCore;
 let gutter = two.height / 18;
+const radiusScale = 6;
 const maxLumens = 100 ;
 const haloColor = '#66b3ff';
 const interactiveCoreColor = 'rgba(255, 255, 255, 0)'
@@ -116,7 +117,7 @@ function makeSunAndMoon(too) {
 
     let color = 'black';
     let sam = too.makeGroup();
-    const radius = too.height / 4;
+    const radius = too.height / radiusScale;
 
     const bg = too.makeCircle(0, 0, radius);
     bg.noStroke();
@@ -204,6 +205,7 @@ function exitEclipse() {
 
 function clickEclipse() {
   console.log('eclipse clicked');
+  window.open('mailto:john@johnoakley.com?Inquiries for JohnOakley=subject');
 }
 
 function hideBanners() {
@@ -221,7 +223,7 @@ function revealBanners(too) {
 
   const radius = Math.min(too.width / scale, too.height / scale);
 
-  const size = radius * (0.33)
+  const size = radius * (0.22)
 
 
 
@@ -279,7 +281,7 @@ function getSecondPercent(date = getDate()) {
 }
 
 function setCoronaMarkers(too, date = getDate()) {
-    const baseRadius = too.height / 4;
+    const baseRadius = too.height / radiusScale;
 
     if(!hourCorona || !minuteCorona) return;
 
