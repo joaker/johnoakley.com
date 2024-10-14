@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && rm -rf dist/moment/* && cp -r build/* ./dist/moment/ && cp ../secrets/sftp-config.json ./dist/",
+    "build": "react-scripts build && rm -rf dist/moment/* && cp -r build/* ./dist/moment/ && cp ./secrets/sftp-config.json ./dist/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
