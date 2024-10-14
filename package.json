@@ -1,6 +1,7 @@
 {
   "name": "johnoakley.com",
   "version": "0.1.0",
+  "homepage" : "https://johnoakley.com/moment",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
@@ -14,7 +15,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && rm -rf dist/moment/* && cp -r build/* ./dist/moment/ && cp ../secrets/sftp-config.json ./dist/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
