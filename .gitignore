@@ -10,6 +10,10 @@
 
 # production
 /build
+/dist/moment/*
+
+# sftp
+sftp-config.json
 
 # secrets
 /secrets
