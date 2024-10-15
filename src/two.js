@@ -22,9 +22,7 @@ const hourMarkerColor = 'rgb(255, 128, 0)';
 const minuteMarkerColor = 'white';  
 const secondMarkerColor = haloColor;
 
-let messageIndex = -1;
 let messageInterval = null;
-let messageDelay = 1 * 1000;
 const messages = 'Every\nMoment\nCounts'.split("\n");
 
 
@@ -63,6 +61,9 @@ interactiveLayer.add(centerInteractive)
 two.update();
 
 registerHandlers();
+
+const bannerRevealDelay = 5 * 1000;
+setTimeout(() => revealBanners(two), bannerRevealDelay);
 
 two
   .bind('resize', function() {
@@ -192,12 +193,10 @@ function getMinutePercent(date = getDate()) {
 function enterEclipse() {
   two.renderer.domElement.style.cursor = 'pointer';
 
-  messageIndex = 0;
   revealBanners(two);
 }
 
 function exitEclipse() {
-  messageIndex = -1;
   two.renderer.domElement.style.cursor = 'default';
   clearInterval(messageInterval);
   hideBanners()
@@ -205,7 +204,7 @@ function exitEclipse() {
 
 function clickEclipse() {
   console.log('eclipse clicked');
-  window.open('mailto:john@johnoakley.com?Inquiries for JohnOakley=subject');
+  window.open('mailto:john@johnoakley.com');
 }
 
 function hideBanners() {
