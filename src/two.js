@@ -22,7 +22,6 @@ const hourMarkerColor = 'rgb(255, 128, 0)';
 const minuteMarkerColor = 'white';  
 const secondMarkerColor = haloColor;
 
-let messageInterval = null;
 const messages = 'Every\nMoment\nCounts'.split("\n");
 
 
@@ -192,14 +191,10 @@ function getMinutePercent(date = getDate()) {
 
 function enterEclipse() {
   two.renderer.domElement.style.cursor = 'pointer';
-
-  revealBanners(two);
 }
 
 function exitEclipse() {
   two.renderer.domElement.style.cursor = 'default';
-  clearInterval(messageInterval);
-  hideBanners()
 }
 
 function clickEclipse() {
